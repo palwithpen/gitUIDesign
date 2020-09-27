@@ -1,0 +1,96 @@
+.main-section{
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top:0;
+    left: 0;
+}
+
+
+.grid-container-check{
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-rows: 60px auto;
+    grid-template-columns: 40px 30% auto;
+}
+
+
+.box1{
+    background-color: aqua;
+    grid-column: 1/span 3
+}
+
+.box2{
+    background-color: yellow;
+    grid-column: 1/span 1;
+}
+
+.box3{
+    background-color: red;
+    grid-column: 2/span 2;
+}
+
+.login-component-wrapper {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+.login-header-container{
+    padding-top: 30px;
+    width: 100%;
+    text-align: center;
+    font-size: 30px;
+}
+
+.login-textfield {
+    background-color: #fff;
+    width: 90%;
+    margin: 15px 18px;
+}
+
+.MuiFormControl-root {
+    width: 100% !important;
+}
+
+.MuiOutlinedInput-input {
+    padding: 18.5px 14px;
+    height: 50px;
+    text-align: center;
+}
+
+.ms-Button{
+    width: 80%;
+    height: 50px;
+    margin: 36px;
+}
+
+.login-signup{
+    height: 30px;
+    width: 30px;
+}
+
+.custom-button{
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    width: 70%;
+    border-radius: 2px;
+}
+
+.custom-button:hover{
+    background-color:#3d9140
+}
+
+.button-container{
+    text-align: center;
+    padding-top: 10px;
+}
