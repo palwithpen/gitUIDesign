@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.palwithpen.restService.bo.PostSkeleton;
 import com.palwithpen.restService.entity.UserModel;
 import com.palwithpen.restService.service.Service;
 
@@ -50,6 +51,11 @@ public class ApiController {
 		else {
 			return "Something is missing";
 		}
-	}	
+	}
+	
+	@RequestMapping(value= {"/hitPost"}, method = {RequestMethod.POST} )
+	public String hitPost(@RequestBody PostSkeleton postBo) {
+		return "Post Created";
+	}
 }
 	
