@@ -43,9 +43,13 @@ public class ApiController {
 		userModel.setCreationDate(creationDate.format(formatCdate));
 		logger.info(userModel.getCreationDate() + " "+ userModel.getUserId() + "" + userModel.getPassKey()+ " "+ userModel.getUserRole());
 		
+		if (userModel.getUserId() != null && userModel.getPassKey() != null && userModel.getUserRole() !=null && !userModel.getUserId().isEmpty() && !userModel.getPassKey().isEmpty() && !userModel.getUserRole().isEmpty()) {
 		service.createUser(userModel);
-		
 		return "User Created Successfully";	
+		}
+		else {
+			return "Something is missing";
+		}
 	}	
 }
 	
