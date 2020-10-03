@@ -2,12 +2,14 @@ package com.palwithpen.restService.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "post_dump")
 public class PostModel {
-
+	
+	@Id
 	@Column(name ="post_id", length =10)
 	private String postId;
 	
