@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.palwithpen.restService.bo.PostSkeleton;
 import com.palwithpen.restService.entity.UserModel;
 import com.palwithpen.restService.service.Service;
+import com.palwithpen.restService.util.ResponseGenerator;
 
 @RestController		
 public class ApiController {
@@ -37,6 +40,7 @@ public class ApiController {
 	}
 	
 	@Autowired Service service;
+	
 	
 	@RequestMapping(value={"/getUser/{userId}"}, method = {RequestMethod.GET})
 	public Object getUserById(@PathVariable String userId) {
@@ -76,12 +80,11 @@ public class ApiController {
 			if(requestBody.get("userName") != null && !requestBody.get("userName").toString().isEmpty()) {
 				String userId = requestBody.get("userName").toString();
 			Object response = getUserById(userId);
-			String responseJson = gson.toJson(response);
-			logger.info("getting response as json " + responseJson);
-			
+			Object responseJson = gson.toJson(response);
+			logger.info( " getting response as json " + responseJson);
 			}
-			responseMap.put("statusCode","0000");
-			responseMap.put("statusDescription", "user found");
+
+			responseMap  = ResponseGenerator.getSuccessResponse("User Found");
 		}
 		catch(Exception e) {
 			e.printStackTrace();
