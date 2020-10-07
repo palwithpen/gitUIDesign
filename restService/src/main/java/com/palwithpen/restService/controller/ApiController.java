@@ -65,26 +65,29 @@ public class ApiController {
 		}
 	}
 	
-	@RequestMapping(value= {"/hitPost"}, method = {RequestMethod.POST} )
-	public Map<String, Object> hitPost(@RequestBody PostSkeleton postBo) {
-		Map <String, Object> responseMap= new HashMap<>(); 
-		
-		return responseMap;
-	}
+	
 	
 	@RequestMapping(value = {"/checkCreds"}, method = {RequestMethod.POST})
 	public Map <String, Object> checkUserCreds (@RequestBody Map<String , Object> requestBody){
 		Map <String, Object> responseMap = new HashMap<String, Object>();
 		try {
-
+			
 			if(requestBody.get("userName") != null && !requestBody.get("userName").toString().isEmpty()) {
-				String userId = requestBody.get("userName").toString();
-			Object response = getUserById(userId);
-			Object responseJson = gson.toJson(response);
-			logger.info( " getting response as json " + responseJson);
+			String userName = requestBody.get("userName").toString();
+			String passKey = requestBody.get("passKey").toString();
+			String uNameFetched = "palwithpen";
+			String passKeyFetched = "palwithpen";
+			
+			logger.info("Creds: " + userName + " : " + passKey);
+			logger.info("hrd "+ uNameFetched +" : " + passKeyFetched);
+				if (uNameFetched == userName || passKeyFetched == passKey) {
+					responseMap =  ResponseGenerator.getSuccessResponse("CREDENTAILS_MATCHED");
+				}
+				else {
+					responseMap = ResponseGenerator.getFailureResponse("CREDENTIALS_MISMATCH ");
+					logger.error("creds didn't match");
+				}
 			}
-
-			responseMap  = ResponseGenerator.getSuccessResponse("User Found");
 		}
 		catch(Exception e) {
 			e.printStackTrace();
