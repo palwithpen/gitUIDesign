@@ -1,5 +1,7 @@
 package com.palwithpen.restService.service;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +15,8 @@ public class Service {
 	
 	@Autowired UserRepo userRepo;
 	
-	public Object getUserByID(String userId) {
-		Object userDetails = userRepo.findById(userId);
-		logger.info(userId + "'s user found");
-		return userDetails;
+	public Optional<UserModel> getUserByID(String userId) {
+		return userRepo.findById(userId);
 	}
 	
 	public void createUser(UserModel userModel){
