@@ -45,8 +45,8 @@ public class ApiController {
 	
 	
 	@RequestMapping(value={"/getUser/{userId}"}, method = {RequestMethod.GET})
-	public Map<String, String> getUserById(@PathVariable String userId) {
-		Map<String ,String> responseMap =  new HashMap<>();
+	public Map<String, Object> getUserById(@PathVariable String userId) {
+		Map<String ,Object> responseMap =  new HashMap<>();
 		Optional<UserModel> userDetails = service.getUserByID(userId);
 		responseMap.put("userName", userDetails.get().getUserId());
 		responseMap.put("passKey" , userDetails.get().getPassKey());
@@ -56,7 +56,7 @@ public class ApiController {
 	}
 	
 	@RequestMapping(value= {"/createUser"}, method = {RequestMethod.POST})
-	public String createUser(@RequestBody UserModel userModel) {
+	public Map<String, Object> createUser(@RequestBody UserModel userModel) {
 		LocalDateTime creationDate = LocalDateTime.now();
 		DateTimeFormatter formatCdate = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 		userModel.setCreationDate(creationDate.format(formatCdate));
@@ -64,10 +64,10 @@ public class ApiController {
 		
 		if (userModel.getUserId() != null && userModel.getPassKey() != null && userModel.getUserRole() !=null && !userModel.getUserId().isEmpty() && !userModel.getPassKey().isEmpty() && !userModel.getUserRole().isEmpty()) {
 		service.createUser(userModel);
-		return "User Created Successfully";	
+		return ResponseGenerator.getSuccessResponse("user_created_successfully");	
 		}
 		else {
-			return "Something is missing";
+			return ResponseGenerator.getFailureResponse("data_missing");
 		}
 	}
 	
@@ -78,42 +78,32 @@ public class ApiController {
 		logger.info("Creds checking 3rd way");
 		Map <String, Object> responseMap = new HashMap<String, Object>();
 		try {
-			
-			if(requestBody.get("userName") != null && !requestBody.get("userName").toString().isEmpty()) {
+			if(requestBody.get("userName") != null && !requestBody.get("userName").toString().isEmpty()) {	
 				String userIdFetched  = requestBody.get("userName").toString();
 				String passKeyFetched = requestBody.get("passKey").toString();
 				
-				Map<String, String> responseUser = getUserById(userIdFetched);
+				Map<String, Object> responseUser = getUserById(userIdFetched);
 				String userId = responseUser.get("userName").toString();
 				String passKey = responseUser.get("passKey").toString();
-				
-				try {
 
 					if (responseUser != null && !responseUser.isEmpty()) {
-						logger.info(passKey);
-						logger.info(passKeyFetched);
-						if (passKey.trim().toString() == passKeyFetched.trim().toString()) {
+						if (userIdFetched == userId && passKeyFetched == passKey) {
 							logger.info("sjadghj");
-						}
+						return ResponseGenerator.getSuccessResponse("user_matched");
+								}
 					}
 					else {
 						responseMap.put("status", "user_not_found");
 					}	
-				}
-				catch(Exception e) {
-					logger.error(" "+e);
-				}
 			}
 		responseMap.put("jsdh", "jsd");
 		}
 		catch(Exception e) {
 			e.printStackTrace();
-
-		      responseMap.put("Status", "Error");
+			responseMap.put("Status", "Error");
 		}
-
-		return null;
-				}
+		return responseMap;
+	}
 	
 }
 	

@@ -8,7 +8,7 @@ public class ResponseGenerator {
 
 	public static Map<String, Object> getSuccessResponse(String description) {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
-		responseMap.put("statusCode", "000");
+		responseMap.put("statusCode", "0000");
 		responseMap.put("statusDescription", description);
 		responseMap.put("statusType", "SUCCESS");
 		return responseMap;
