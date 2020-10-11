@@ -6,11 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.spel.ast.OpInc;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,8 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.palwithpen.restService.bo.PostSkeleton;
 import com.palwithpen.restService.entity.UserModel;
 import com.palwithpen.restService.service.Service;
 import com.palwithpen.restService.util.ResponseGenerator;
@@ -96,7 +92,7 @@ public class ApiController {
 						String userId = responseUser.get("userName").toString();
 						String password = responseUser.get("passKey").toString();
 						
-						if (userIdFetched.equals(userId) && passKeyFetched.equals(password)) {
+						if (userIdFetched.equals(userId) && passKeyFetched.equals(password)){
 							return ResponseGenerator.getSuccessResponse("user_matched");
 						}
 						else{
