@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.palwithpen.restService.bo.ContactDetailsBO;
+import com.palwithpen.restService.bo.UserDetailsBO;
+import com.palwithpen.restService.entity.UserDetails;
 import com.palwithpen.restService.entity.UserModel;
 import com.palwithpen.restService.service.Service;
 import com.palwithpen.restService.util.ResponseGenerator;
@@ -65,7 +68,6 @@ public class ApiController {
 		LocalDateTime creationDate = LocalDateTime.now();
 		DateTimeFormatter formatCdate = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 		userModel.setCreationDate(creationDate.format(formatCdate));
-		logger.info(userModel.getCreationDate() + " "+ userModel.getUserId() + "" + userModel.getPassKey()+ " "+ userModel.getUserRole());
 		
 		if (userModel.getUserId() != null && userModel.getPassKey() != null && userModel.getUserRole() !=null && !userModel.getUserId().isEmpty() && !userModel.getPassKey().isEmpty() && !userModel.getUserRole().isEmpty()) {
 		service.createUser(userModel);
@@ -111,5 +113,28 @@ public class ApiController {
 		return responseMap;
 	}
 	
+	@RequestMapping(value = {"/feedingUserDetails"}, method = {RequestMethod.POST})
+	public Map<String, Object> feedingUserDetails(@RequestBody Map<String, Object>requestBody){
+		Map<String, Object> responseMap = new HashMap<>();
+		UserDetails payload = new UserDetails();
+		ContactDetailsBO contactDetailsBO = new ContactDetailsBO();
+		UserDetailsBO userDetailsBO = new UserDetailsBO();
+		
+		if (requestBody != null && !requestBody.isEmpty()) {
+			LocalDateTime creationDate = LocalDateTime.now();
+			DateTimeFormatter formatCdate = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+			payload.setCreationDate(creationDate.format(formatCdate));
+
+			payload.setContactDetails(contactDetailsBO);
+			payload.setUserDetails(userDetailsBO);
+			
+			return ResponseGenerator.getSuccessResponse("DETAILS_ADDED_SUCCESSFULLY");
+		}
+		else {
+			return ResponseGenerator.getFailureResponse("REQUEST_EMPTY");
+		}
+		
+		
+	}
 }
 	
