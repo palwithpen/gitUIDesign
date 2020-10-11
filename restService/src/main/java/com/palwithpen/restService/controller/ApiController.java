@@ -47,12 +47,21 @@ public class ApiController {
 	@RequestMapping(value={"/getUser/{userId}"}, method = {RequestMethod.GET})
 	public Map<String, Object> getUserById(@PathVariable String userId) {
 		Map<String ,Object> responseMap =  new HashMap<>();
-		Optional<UserModel> userDetails = service.getUserByID(userId);
-		responseMap.put("userName", userDetails.get().getUserId());
-		responseMap.put("passKey" , userDetails.get().getPassKey());
-		responseMap.put("creationDate",userDetails.get().getCreationDate());
-		responseMap.put("userRole",userDetails.get().getUserRole());
-		return responseMap;	
+		try {
+			Optional<UserModel> emptyOtional = Optional.empty();
+			Optional<UserModel> userDetails = service.getUserByID(userId);
+			
+			responseMap.put("userName", userDetails.get().getUserId());
+			responseMap.put("passKey" , userDetails.get().getPassKey());
+			responseMap.put("creationDate",userDetails.get().getCreationDate());
+			responseMap.put("userRole",userDetails.get().getUserRole());
+			return responseMap;	
+			
+		}
+		catch (Exception e) {
+			logger.info("user not found");
+			return responseMap;
+		}
 	}
 	
 	@RequestMapping(value= {"/createUser"}, method = {RequestMethod.POST})
@@ -81,22 +90,23 @@ public class ApiController {
 			if(requestBody.get("userName") != null && !requestBody.get("userName").toString().isEmpty()) {	
 				String userIdFetched  = requestBody.get("userName").toString();
 				String passKeyFetched = requestBody.get("passKey").toString();
-				
 				Map<String, Object> responseUser = getUserById(userIdFetched);
-				String userId = responseUser.get("userName").toString();
-				String passKey = responseUser.get("passKey").toString();
-
 					if (responseUser != null && !responseUser.isEmpty()) {
-						if (userIdFetched == userId && passKeyFetched == passKey) {
-							logger.info("sjadghj");
-						return ResponseGenerator.getSuccessResponse("user_matched");
-								}
+						
+						String userId = responseUser.get("userName").toString();
+						String password = responseUser.get("passKey").toString();
+						
+						if (userIdFetched.equals(userId) && passKeyFetched.equals(password)) {
+							return ResponseGenerator.getSuccessResponse("user_matched");
+						}
+						else{
+							return ResponseGenerator.getFailureResponse("user_id_or_password_match_failure");
+						}
 					}
 					else {
-						responseMap.put("status", "user_not_found");
-					}	
+						return ResponseGenerator.getFailureResponse("user_not_found");
+					}
 			}
-		responseMap.put("jsdh", "jsd");
 		}
 		catch(Exception e) {
 			e.printStackTrace();
