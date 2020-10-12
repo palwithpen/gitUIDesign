@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.palwithpen.restService.bo.ContactDetailsBO;
@@ -115,26 +117,51 @@ public class ApiController {
 	
 	@RequestMapping(value = {"/feedingUserDetails"}, method = {RequestMethod.POST})
 	public Map<String, Object> feedingUserDetails(@RequestBody Map<String, Object>requestBody){
-		Map<String, Object> responseMap = new HashMap<>();
 		UserDetails payload = new UserDetails();
 		ContactDetailsBO contactDetailsBO = new ContactDetailsBO();
 		UserDetailsBO userDetailsBO = new UserDetailsBO();
-		
-		if (requestBody != null && !requestBody.isEmpty()) {
-			LocalDateTime creationDate = LocalDateTime.now();
-			DateTimeFormatter formatCdate = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
-			payload.setCreationDate(creationDate.format(formatCdate));
-
-			payload.setContactDetails(contactDetailsBO);
-			payload.setUserDetails(userDetailsBO);
+		try {
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			
-			return ResponseGenerator.getSuccessResponse("DETAILS_ADDED_SUCCESSFULLY");
+			
+			if (requestBody != null && !requestBody.isEmpty()) {
+				LocalDateTime creationDate = LocalDateTime.now();
+				DateTimeFormatter formatCdate = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+
+				String addressMapper = mapper.writeValueAsString(requestBody.get("addressDetails"));
+				JSONObject addJson = new JSONObject(addressMapper);
+				
+				String contactMapper = mapper.writeValueAsString(requestBody.get("contactDetails"));
+				JSONObject contactJson = new JSONObject(contactMapper);
+				
+					userDetailsBO.setIou(addJson.getString("iou").toString());
+					userDetailsBO.setFuntionalUnit(addJson.getString("functionalUnit").toString());
+					userDetailsBO.setOperationalBranch(addJson.getString("oprationalBranch").toString());
+					userDetailsBO.setPostDesignation(addJson.getString("postDesignation"));
+					userDetailsBO.setReportingPL(addJson.getString("reportingPL"));
+				
+					contactDetailsBO.setExtNo(contactJson.getString("extentionNum"));
+					contactDetailsBO.setOfcEmail(contactJson.getString("officeEmail"));
+					contactDetailsBO.setMobileNo(contactJson.getString("mobileNum"));
+					
+				payload.setCreationDate(creationDate.format(formatCdate));
+				
+				payload.setContactDetails(contactDetailsBO);
+				payload.setUserDetails(userDetailsBO);
+				
+				service.feedingUserDetails(payload);
+				return ResponseGenerator.getSuccessResponse("DETAILS_ADDED_SUCCESSFULLY");
+			}
+			else {
+				return ResponseGenerator.getFailureResponse("REQUEST_EMPTY");
+			}
+
 		}
-		else {
-			return ResponseGenerator.getFailureResponse("REQUEST_EMPTY");
+		catch(Exception ex) {
+			ex.printStackTrace();
+			logger.error("Error in User Details " + ex);
 		}
-		
-		
+		return null;
 	}
 }
 	
