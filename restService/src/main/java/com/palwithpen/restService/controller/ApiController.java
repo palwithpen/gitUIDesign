@@ -127,28 +127,59 @@ public class ApiController {
 			if (requestBody != null && !requestBody.isEmpty()) {
 				LocalDateTime creationDate = LocalDateTime.now();
 				DateTimeFormatter formatCdate = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+				
+				if(requestBody.get("addressDetails") != null) {
+					String addressMapper = mapper.writeValueAsString(requestBody.get("addressDetails"));
+					JSONObject addJson = new JSONObject(addressMapper);
+					logger.info(" " + addJson);
+					if(!addJson.getString("iou").isEmpty() && !addJson.getString("functionalUnit").isEmpty() && !addJson.getString("oprationalBranch").isEmpty() && !addJson.getString("postDesignation").isEmpty() && addJson.getString("reportingPL").toString() != null) {
+						userDetailsBO.setIou(addJson.getString("iou"));
+						userDetailsBO.setFuntionalUnit(addJson.getString("functionalUnit"));
+						userDetailsBO.setOperationalBranch(addJson.getString("oprationalBranch"));
+						userDetailsBO.setPostDesignation(addJson.getString("postDesignation"));
+						userDetailsBO.setReportingPL(addJson.getString("reportingPL"));
+					}
+					else {
+						logger.error("some values missing in addressDetails ");
+						return ResponseGenerator.getFailureResponse("VALUES_MISSING_ADDRESS_DETAILS");
+					}
+				}
+				else {
+					logger.error("addressDetails is null");
 
-				String addressMapper = mapper.writeValueAsString(requestBody.get("addressDetails"));
-				JSONObject addJson = new JSONObject(addressMapper);
+					return ResponseGenerator.getFailureResponse("ADDRESS_DETAILS_EMPTY");
+				}
 				
-				String contactMapper = mapper.writeValueAsString(requestBody.get("contactDetails"));
-				JSONObject contactJson = new JSONObject(contactMapper);
+				if(requestBody.get("contactDetails") != null) {
+					String contactMapper = mapper.writeValueAsString(requestBody.get("contactDetails"));
+					JSONObject contactJson = new JSONObject(contactMapper);
+					logger.info(" " + contactJson);					
+					if(!contactJson.getString("extentionNum").isEmpty() && !contactJson.getString("officeEmail").isEmpty() && !contactJson.getString("mobileNum").isEmpty()) {
+						contactDetailsBO.setExtNo(contactJson.getString("extentionNum"));
+						contactDetailsBO.setOfcEmail(contactJson.getString("officeEmail"));
+						contactDetailsBO.setMobileNo(contactJson.getString("mobileNum"));
+					}
+					else {
+						logger.error("Some Values are missing in contactDetails");
+						return ResponseGenerator.getFailureResponse("VALUES_MISSING_CONTACT_DETAILS");
+					}
+				}
+				else {
+					logger.error("contactDetails is null");
+					return ResponseGenerator.getFailureResponse("CONTACT_DETAILS_EMPTY");
+				}
+				String contactDetailsPayload = gson.toJson(contactDetailsBO);
+				String userDetailsPayload = gson.toJson(userDetailsBO);
 				
-					userDetailsBO.setIou(addJson.getString("iou").toString());
-					userDetailsBO.setFuntionalUnit(addJson.getString("functionalUnit").toString());
-					userDetailsBO.setOperationalBranch(addJson.getString("oprationalBranch").toString());
-					userDetailsBO.setPostDesignation(addJson.getString("postDesignation"));
-					userDetailsBO.setReportingPL(addJson.getString("reportingPL"));
-				
-					contactDetailsBO.setExtNo(contactJson.getString("extentionNum"));
-					contactDetailsBO.setOfcEmail(contactJson.getString("officeEmail"));
-					contactDetailsBO.setMobileNo(contactJson.getString("mobileNum"));
-					
 				payload.setCreationDate(creationDate.format(formatCdate));
+				payload.setUserId(requestBody.get("userId").toString());
 				
-				payload.setContactDetails(contactDetailsBO);
-				payload.setUserDetails(userDetailsBO);
+				logger.info("Contact Details "+contactDetailsPayload);
+				logger.info("User Details "+userDetailsPayload);
 				
+				payload.setContactDetails(contactDetailsPayload);
+				payload.setUserDetails(userDetailsPayload);
+
 				service.feedingUserDetails(payload);
 				return ResponseGenerator.getSuccessResponse("DETAILS_ADDED_SUCCESSFULLY");
 			}
@@ -158,10 +189,9 @@ public class ApiController {
 
 		}
 		catch(Exception ex) {
-			ex.printStackTrace();
 			logger.error("Error in User Details " + ex);
+			return ResponseGenerator.getExcpResponse(ex);
 		}
-		return null;
 	}
 }
 	

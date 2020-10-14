@@ -22,4 +22,13 @@ public class ResponseGenerator {
 		
 		return responseMap;
 	}
+	
+	public static Map<String, Object> getExcpResponse(Exception remark){
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		responseMap.put("statusCode", "3022");
+		responseMap.put("statusDescription", remark);
+		responseMap.put("statusType", "EXCEPTION");
+		
+		return responseMap;
+	}
 }

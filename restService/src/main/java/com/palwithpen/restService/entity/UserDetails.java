@@ -17,13 +17,13 @@ public class UserDetails {
 	@Column(name = "user_id" , length = 25)
 	private String userId;
 	
-	@Lob
 	@Column(name = "user_details")
-	private UserDetailsBO userDetails;
-	
 	@Lob
+	private String userDetails;
+	
 	@Column(name = "contact_details")
-	private ContactDetailsBO contactDetails;
+	@Lob
+	private String contactDetails;
 	
 	@Column(name = "creation_date" ,length = 25)
 	private String creationDate;
@@ -36,19 +36,19 @@ public class UserDetails {
 		this.userId = userId;
 	}
 
-	public UserDetailsBO getUserDetails() {
+	public String getUserDetails() {
 		return userDetails;
 	}
 
-	public void setUserDetails(UserDetailsBO userDetails) {
+	public void setUserDetails(String userDetails) {
 		this.userDetails = userDetails;
 	}
 
-	public ContactDetailsBO getContactDetails() {
+	public String getContactDetails() {
 		return contactDetails;
 	}
 
-	public void setContactDetails(ContactDetailsBO contactDetails) {
+	public void setContactDetails(String contactDetails) {
 		this.contactDetails = contactDetails;
 	}
 
