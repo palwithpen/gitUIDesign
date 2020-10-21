@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -25,6 +26,7 @@ import com.palwithpen.restService.bo.UserDetailsBO;
 import com.palwithpen.restService.entity.UserDetails;
 import com.palwithpen.restService.entity.UserModel;
 import com.palwithpen.restService.service.Service;
+import com.palwithpen.restService.util.ComponentValidator;
 import com.palwithpen.restService.util.ResponseGenerator;
 
 @RestController		
@@ -43,13 +45,29 @@ public class ApiController {
 	}
 	
 	@Autowired Service service;
+	@Autowired ComponentValidator comVal;
 	
+	@SuppressWarnings("static-access")
+	@RequestMapping(value= {"/headers"} , method = {RequestMethod.GET})
+	public String headerReader(@RequestHeader Map<String, String> headers){
+		try {
+			Boolean validator = comVal.HeaderValidator(headers);
+			if (validator.valueOf(true)) {
+				return "header is proper";
+			}
+			else {
+				return "header not good";
+			}
+		} catch (Exception e) {
+			
+		}
+		return null;
+	}
 	
 	@RequestMapping(value={"/getUser/{userId}"}, method = {RequestMethod.GET})
 	public Map<String, Object> getUserById(@PathVariable String userId) {
 		Map<String ,Object> responseMap =  new HashMap<>();
 		try {
-			Optional<UserModel> emptyOtional = Optional.empty();
 			Optional<UserModel> userDetails = service.getUserByID(userId);
 			
 			responseMap.put("userName", userDetails.get().getUserId());
@@ -83,7 +101,7 @@ public class ApiController {
 	
 	
 	@RequestMapping(value = {"/checkCreds"}, method = {RequestMethod.POST})
-	public Map <String, Object> checkUserCreds (@RequestBody Map<String , Object> requestBody){
+	public Map <String, Object> checkUserCreds (@RequestBody Map<String , Object> requestBody, @RequestHeader Map<String , String> headers){
 		logger.info("Creds checking 3rd way");
 		Map <String, Object> responseMap = new HashMap<String, Object>();
 		try {
@@ -129,19 +147,16 @@ public class ApiController {
 				DateTimeFormatter formatCdate = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 				
 				if(requestBody.get("addressDetails") != null) {
+				
 					String addressMapper = mapper.writeValueAsString(requestBody.get("addressDetails"));
 					JSONObject addJson = new JSONObject(addressMapper);
 					logger.info(" " + addJson);
-					if(!addJson.getString("iou").isEmpty() && !addJson.getString("functionalUnit").isEmpty() && !addJson.getString("oprationalBranch").isEmpty() && !addJson.getString("postDesignation").isEmpty() && addJson.getString("reportingPL").toString() != null) {
+					if(!addJson.getString("iou").isEmpty() && !addJson.getString("functionalUnit").isEmpty() && !addJson.getString("oprationalBranch").isEmpty() && !addJson.getString("postDesignation").isEmpty() && !addJson.getString("reportingPL").isEmpty()) {
 						userDetailsBO.setIou(addJson.getString("iou"));
 						userDetailsBO.setFuntionalUnit(addJson.getString("functionalUnit"));
 						userDetailsBO.setOperationalBranch(addJson.getString("oprationalBranch"));
 						userDetailsBO.setPostDesignation(addJson.getString("postDesignation"));
 						userDetailsBO.setReportingPL(addJson.getString("reportingPL"));
-					}
-					else {
-						logger.error("some values missing in addressDetails ");
-						return ResponseGenerator.getFailureResponse("VALUES_MISSING_ADDRESS_DETAILS");
 					}
 				}
 				else {
@@ -158,10 +173,6 @@ public class ApiController {
 						contactDetailsBO.setExtNo(contactJson.getString("extentionNum"));
 						contactDetailsBO.setOfcEmail(contactJson.getString("officeEmail"));
 						contactDetailsBO.setMobileNo(contactJson.getString("mobileNum"));
-					}
-					else {
-						logger.error("Some Values are missing in contactDetails");
-						return ResponseGenerator.getFailureResponse("VALUES_MISSING_CONTACT_DETAILS");
 					}
 				}
 				else {
