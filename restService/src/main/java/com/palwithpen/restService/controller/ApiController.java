@@ -38,21 +38,23 @@ public class ApiController {
 	
 	ObjectMapper mapper = new ObjectMapper();
 	
+
+	@Autowired Service service;
+	@Autowired ComponentValidator comVal;
+	
 	@RequestMapping("/hey")
 	@ResponseBody
 	public String ConnectivityCheck() {
 		return "Connected";
 	}
 	
-	@Autowired Service service;
-	@Autowired ComponentValidator comVal;
-	
 	@SuppressWarnings("static-access")
 	@RequestMapping(value= {"/headers"} , method = {RequestMethod.GET})
 	public String headerReader(@RequestHeader Map<String, String> headers){
 		try {
 			Boolean validator = comVal.HeaderValidator(headers);
-			if (validator.valueOf(true)) {
+			logger.info(" com check "+ comVal.HeaderValidator(headers));
+			if (validator) {
 				return "header is proper";
 			}
 			else {

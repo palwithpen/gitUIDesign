@@ -5,41 +5,36 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-
+import org.springframework.stereotype.Component;
+@Component
 public class ComponentValidator {
 
-	@Value("${auth.header.value}")
-	private String headerValue;
 	
-	@Value("${auth.header.key}")
-	private String headerKey;
 	
 	Logger logger = LoggerFactory.getLogger(getClass());
 	
 	public Boolean HeaderValidator(Map<String, String> headers) {
 		Boolean res = null; 
 		try {
-			if(headers != null && !headers.isEmpty() && headers.containsKey("username") && headers.containsKey("passPhrase")) {
+			if(headers != null && !headers.isEmpty() && headers.containsKey("passphrase") && headers.containsKey("username")) {
+				logger.info("inside if block");
 				String head1 = headers.get("username");
-				String head2 = headers.get("passPhrase");	
-				if (head1.equals(headerKey) && head2.equals(headerValue)) {
+				String head2 = headers.get("passphrase");
+				if (head1.equals("palwithpen") && head2.equals("proto")) {
 					logger.info("Got proper headers");
 					res = true;
-				}
-				else {
+				}else {
+					logger.info("headers didn't match");
 					res = false;
 				}
-				
-			}
-			else {
+			}else {
 				res = false;
 				logger.error("headers is/are not proper");
 			}
-			
 		} catch (Exception e) {
 			logger.error("Exception in header validation " + e.getMessage());
-			return res =  false;
-		}
+			res =  false;
+			}
 		return res;
 	}
 }
