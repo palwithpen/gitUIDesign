@@ -29,4 +29,8 @@ public class Service {
 	public void feedingUserDetails(UserDetails userDetails) {
 		detailsRepo.save(userDetails);
 	}
+	
+	public void deleteUser(String id) {
+		userRepo.deleteById(id);
+	}
 }

@@ -107,7 +107,7 @@ public class ApiController {
 		logger.info("Creds checking 3rd way");
 		Map <String, Object> responseMap = new HashMap<String, Object>();
 		try {
-			if(requestBody.get("userName") != null && !requestBody.get("userName").toString().isEmpty()) {	
+			if(requestBody.get("userName") != null && !requestBody.get("userName").toString().isEmpty()) {
 				String userIdFetched  = requestBody.get("userName").toString();
 				String passKeyFetched = requestBody.get("passKey").toString();
 				Map<String, Object> responseUser = getUserById(userIdFetched);
@@ -163,7 +163,6 @@ public class ApiController {
 				}
 				else {
 					logger.error("addressDetails is null");
-
 					return ResponseGenerator.getFailureResponse("ADDRESS_DETAILS_EMPTY");
 				}
 				
@@ -205,6 +204,28 @@ public class ApiController {
 			logger.error("Error in User Details " + ex);
 			return ResponseGenerator.getExcpResponse(ex);
 		}
+	}
+	
+	@RequestMapping(value = {"/deleteUser"}, method = {RequestMethod.POST})
+	public Map<String, Object> deleteUser(@RequestBody Map<String, Object>requestBody){
+		try {
+			if(requestBody != null && !requestBody.isEmpty()){
+				if(requestBody.containsKey("userId")){
+					String id = requestBody.get("userId").toString();
+					service.deleteUser(id);
+				}
+				else {
+					return ResponseGenerator.getFailureResponse("userId_empty");
+				}
+			}
+			else {
+				return ResponseGenerator.getFailureResponse("request_body_null");
+			}
+			
+		} catch (Exception e) {
+			return ResponseGenerator.getExcpResponse(e);
+		}
+		return null;
 	}
 }
 	
