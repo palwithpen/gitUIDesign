@@ -2,13 +2,19 @@ package com.palwithpen.restService.util;
 
 import java.util.Map;
 
+import javax.print.DocFlavor.STRING;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import com.palwithpen.restService.controller.ApiController;
 @Component
 public class ComponentValidator {
 
+	@Autowired ApiController controller;
 	
 	
 	Logger logger = LoggerFactory.getLogger(getClass());
@@ -36,5 +42,14 @@ public class ComponentValidator {
 			res =  false;
 			}
 		return res;
+	}
+	
+	public Boolean userPresent(String id){
+		Map<String,Object> userMap = controller.getUserById(id);
+		if (userMap != null && !userMap.isEmpty()) {
+			return true;
+		}else {
+			return false;
+		}		
 	}
 }

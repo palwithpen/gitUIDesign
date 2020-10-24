@@ -33,14 +33,12 @@ import com.palwithpen.restService.util.ResponseGenerator;
 public class ApiController {
 
 	Gson gson = new Gson();
-	
 	Logger logger = LoggerFactory.getLogger(getClass());
-	
 	ObjectMapper mapper = new ObjectMapper();
 	
 
 	@Autowired Service service;
-	@Autowired ComponentValidator comVal;
+	@Autowired ComponentValidator validator;
 	
 	@RequestMapping("/hey")
 	@ResponseBody
@@ -48,19 +46,17 @@ public class ApiController {
 		return "Connected";
 	}
 	
-	@SuppressWarnings("static-access")
 	@RequestMapping(value= {"/headers"} , method = {RequestMethod.GET})
 	public String headerReader(@RequestHeader Map<String, String> headers){
 		try {
-			Boolean validator = comVal.HeaderValidator(headers);
-			logger.info(" com check "+ comVal.HeaderValidator(headers));
-			if (validator) {
+			Boolean isValid = validator.HeaderValidator(headers);
+			logger.info(" com check "+ validator.HeaderValidator(headers));
+			if (isValid) {
 				return "header is proper";
-			}
-			else {
+			}else {
 				return "header not good";
 			}
-		} catch (Exception e) {
+		}catch (Exception e) {
 			
 		}
 		return null;
@@ -76,8 +72,7 @@ public class ApiController {
 			responseMap.put("passKey" , userDetails.get().getPassKey());
 			responseMap.put("creationDate",userDetails.get().getCreationDate());
 			responseMap.put("userRole",userDetails.get().getUserRole());
-			return responseMap;	
-			
+			return responseMap;		
 		}
 		catch (Exception e) {
 			logger.info("user not found");
@@ -90,12 +85,10 @@ public class ApiController {
 		LocalDateTime creationDate = LocalDateTime.now();
 		DateTimeFormatter formatCdate = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 		userModel.setCreationDate(creationDate.format(formatCdate));
-		
 		if (userModel.getUserId() != null && userModel.getPassKey() != null && userModel.getUserRole() !=null && !userModel.getUserId().isEmpty() && !userModel.getPassKey().isEmpty() && !userModel.getUserRole().isEmpty()) {
 		service.createUser(userModel);
 		return ResponseGenerator.getSuccessResponse("user_created_successfully");	
-		}
-		else {
+		}else {
 			return ResponseGenerator.getFailureResponse("data_missing");
 		}
 	}
@@ -111,19 +104,17 @@ public class ApiController {
 				String userIdFetched  = requestBody.get("userName").toString();
 				String passKeyFetched = requestBody.get("passKey").toString();
 				Map<String, Object> responseUser = getUserById(userIdFetched);
-					if (responseUser != null && !responseUser.isEmpty()) {
+					if (validator.userPresent(userIdFetched)) {
 						
 						String userId = responseUser.get("userName").toString();
 						String password = responseUser.get("passKey").toString();
 						
 						if (userIdFetched.equals(userId) && passKeyFetched.equals(password)){
 							return ResponseGenerator.getSuccessResponse("user_matched");
-						}
-						else{
+						}else{
 							return ResponseGenerator.getFailureResponse("user_id_or_password_match_failure");
 						}
-					}
-					else {
+					}else {
 						return ResponseGenerator.getFailureResponse("user_not_found");
 					}
 			}
@@ -160,12 +151,10 @@ public class ApiController {
 						userDetailsBO.setPostDesignation(addJson.getString("postDesignation"));
 						userDetailsBO.setReportingPL(addJson.getString("reportingPL"));
 					}
-				}
-				else {
+				}else {
 					logger.error("addressDetails is null");
 					return ResponseGenerator.getFailureResponse("ADDRESS_DETAILS_EMPTY");
 				}
-				
 				if(requestBody.get("contactDetails") != null) {
 					String contactMapper = mapper.writeValueAsString(requestBody.get("contactDetails"));
 					JSONObject contactJson = new JSONObject(contactMapper);
@@ -175,8 +164,7 @@ public class ApiController {
 						contactDetailsBO.setOfcEmail(contactJson.getString("officeEmail"));
 						contactDetailsBO.setMobileNo(contactJson.getString("mobileNum"));
 					}
-				}
-				else {
+				}else {
 					logger.error("contactDetails is null");
 					return ResponseGenerator.getFailureResponse("CONTACT_DETAILS_EMPTY");
 				}
@@ -212,20 +200,22 @@ public class ApiController {
 			if(requestBody != null && !requestBody.isEmpty()){
 				if(requestBody.containsKey("userId")){
 					String id = requestBody.get("userId").toString();
-					service.deleteUser(id);
+					if(validator.userPresent(id)){
+						service.deleteUser(id);
+						return ResponseGenerator.getSuccessResponse("user_deleted");
+					}
+					else {
+						return ResponseGenerator.getFailureResponse("user_id_not_found");
+					}
+				}else {
+					return ResponseGenerator.getFailureResponse("user_id_empty");
 				}
-				else {
-					return ResponseGenerator.getFailureResponse("userId_empty");
-				}
-			}
-			else {
+			}else {
 				return ResponseGenerator.getFailureResponse("request_body_null");
-			}
-			
+			}		
 		} catch (Exception e) {
 			return ResponseGenerator.getExcpResponse(e);
 		}
-		return null;
 	}
 }
 	
