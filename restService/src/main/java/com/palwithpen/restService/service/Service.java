@@ -22,7 +22,7 @@ public class Service {
 		return userRepo.findById(userId);
 	}
 	
-	public void createUser(UserModel userModel){
+	public void saveUser(UserModel userModel){
 		logger.info("In service block");
 		userRepo.save(userModel);
 	}

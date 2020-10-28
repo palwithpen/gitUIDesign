@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ import com.palwithpen.restService.entity.UserModel;
 import com.palwithpen.restService.service.Service;
 import com.palwithpen.restService.util.ComponentValidator;
 import com.palwithpen.restService.util.ResponseGenerator;
+import com.palwithpen.restService.util.StringGenerator;
 
 @RestController		
 public class ApiController {
@@ -86,7 +88,7 @@ public class ApiController {
 		DateTimeFormatter formatCdate = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 		userModel.setCreationDate(creationDate.format(formatCdate));
 		if (userModel.getUserId() != null && userModel.getPassKey() != null && userModel.getUserRole() !=null && !userModel.getUserId().isEmpty() && !userModel.getPassKey().isEmpty() && !userModel.getUserRole().isEmpty()) {
-		service.createUser(userModel);
+		service.saveUser(userModel);
 		return ResponseGenerator.getSuccessResponse("user_created_successfully");	
 		}else {
 			return ResponseGenerator.getFailureResponse("data_missing");
@@ -97,7 +99,6 @@ public class ApiController {
 	
 	@RequestMapping(value = {"/checkCreds"}, method = {RequestMethod.POST})
 	public Map <String, Object> checkUserCreds (@RequestBody Map<String , Object> requestBody, @RequestHeader Map<String , String> headers){
-		logger.info("Creds checking 3rd way");
 		Map <String, Object> responseMap = new HashMap<String, Object>();
 		try {
 			if(requestBody.get("userName") != null && !requestBody.get("userName").toString().isEmpty()) {
@@ -188,7 +189,7 @@ public class ApiController {
 			}
 
 		}
-		catch(Exception ex) {
+		catch(Exception ex){
 			logger.error("Error in User Details " + ex);
 			return ResponseGenerator.getExcpResponse(ex);
 		}
@@ -203,8 +204,7 @@ public class ApiController {
 					if(validator.userPresent(id)){
 						service.deleteUser(id);
 						return ResponseGenerator.getSuccessResponse("user_deleted");
-					}
-					else {
+					}else {
 						return ResponseGenerator.getFailureResponse("user_id_not_found");
 					}
 				}else {
@@ -216,6 +216,80 @@ public class ApiController {
 		} catch (Exception e) {
 			return ResponseGenerator.getExcpResponse(e);
 		}
+	}
+	
+	@RequestMapping(value = {"/changePassword"}, method = {RequestMethod.POST})
+	public Map<String, Object> updatePassword(@RequestBody Map<String, Object>reqBody){
+		try {
+			UserModel model = new UserModel();
+			
+			if(reqBody != null && !reqBody.isEmpty()){
+				if(reqBody.containsKey("userId") && reqBody.containsKey("passKey") && reqBody.get("userId") != null && reqBody.get("passKey") != null){
+					String id = reqBody.get("userId").toString();
+					String nKey = reqBody.get("passKey").toString();
+					if(validator.userPresent(id)) {
+						Map<String, Object> fetchDetatils = getUserById(id);
+						String role = fetchDetatils.get("userRole").toString(); 
+						LocalDateTime creationDate = LocalDateTime.now();
+						DateTimeFormatter formatCdate = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+						model.setUserId(id);
+						model.setPassKey(nKey);
+						model.setUserRole(role);
+						model.setCreationDate(creationDate.format(formatCdate));
+						service.saveUser(model);
+						return ResponseGenerator.getSuccessResponse("password_changed_successfully");
+					}else {
+						return ResponseGenerator.getFailureResponse("user_id_not_present");
+					}
+				}else {
+					return ResponseGenerator.getFailureResponse("userId_or_passkey_empty");
+				}				
+			}else {
+				return ResponseGenerator.getFailureResponse("body_is_null");
+			}
+		}catch(Exception e){
+			logger.error("Exception in Changing password "+ e);
+			return ResponseGenerator.getExcpResponse(e);
+		}
+	}
+	
+	@RequestMapping(value={"/forgotPassword"}, method = {RequestMethod.POST})
+	public Map<String,Object> forgotPassword(@RequestBody Map<String,Object> rb){
+		try {
+
+			if(rb != null && !rb.isEmpty()) {
+				String nPassKey = StringGenerator.stringMagic();
+				
+				if(rb.get("username") !=null && rb.containsKey("username")) {
+					logger.info(nPassKey);
+					String id =rb.get("username").toString(); 
+
+					UserModel model = new UserModel();
+					logger.info("resetting password");
+					Map<String, Object> fetchDetatils = getUserById(id);
+					String role = fetchDetatils.get("userRole").toString(); 
+					LocalDateTime creationDate = LocalDateTime.now();
+					DateTimeFormatter formatCdate = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+					model.setUserId(id);
+					model.setPassKey(nPassKey);
+					model.setUserRole(role);
+					model.setCreationDate(creationDate.format(formatCdate));
+					service.saveUser(model);
+					
+					return ResponseGenerator.getSuccessResponse("changed_password " + nPassKey);
+				}
+				else {
+					return ResponseGenerator.getFailureResponse("username_empty");
+				}
+			}
+			else {
+				return ResponseGenerator.getFailureResponse("body_empty");
+			}
+				
+		} catch (Exception e) {
+			return null;
+		}
+		
 	}
 }
 	
